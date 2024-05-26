@@ -57,16 +57,17 @@ FORMATTED_DISK_INFO="<table border='1'>$DISK_INFO</table>"
 
 CPU_LOAD_INFO=$(top -bn1 | grep "load avg: " | awk '{print $12 $13 $14}')
 
+# Collect memory usage
 MEMORY_INFO=$(free -h | awk '
 BEGIN {
     OFS="</td><td>"
-    print "<table border=\"1\">"
+    print "<table border=\"1\"><tr><th>Type</th><th>Total</th><th>Used</th><th>Free</th><th>Shared</th><th>Buff/Cache</th><th>Available</th></tr>"
 }
 NR==2 {
-    print "<tr><th>" $1 "</th><th>" $2 "</th><th>" $3 "</th><th>" $4 "</th><th>" $5 "</th></tr>"
+    print "<tr><td>Memory</td><td>" $2 "</td><td>" $3 "</td><td>" $4 "</td><td>" $5 "</td><td>" $6 "</td><td>" $7 "</td></tr>"
 }
-NR>2 {
-    print "<tr><td>" $1 "</td><td>" $2 "</td><td>" $3 "</td><td>" $4 "</td><td>" $5 "</td></tr>"
+NR==3 {
+    print "<tr><td>Swap</td><td>" $2 "</td><td>" $3 "</td><td>" $4 "</td><td>-</td><td>-</td><td>-</td></tr>"
 }
 END {
     print "</table>"
@@ -127,7 +128,7 @@ EMAIL_BODY=$(cat << EOF
 <h2>Memory Usage:</h2>
 <p>$MEMORY_INFO</p>
 <h2>CPU Load:</h2>
-<p>$CPU_LOAD</p>
+<p>$CPU_LOAD_INFO</p>
 <h2>Logged-in Users:</h2>
 <p>$LOGGED_IN_USERS</p>
 <h2>Network Information:</h2>
