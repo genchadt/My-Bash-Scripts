@@ -64,36 +64,35 @@ UPTIME_INFO=$(uptime -p)
 # Function to parse CSV line and handle quoted fields with commas
 parse_csv_line() {
     local line="$1"
-    echo "$line" | awk -v q='"' -v FS=',' -v OFS=',' '
+    echo "$line" | awk -v q='"' -F, '
     function clean_field(field) {
-        gsub(/^"|"$/, "", field);
-        gsub(/""/, q, field);
-        return field;
+        gsub(/^"|"$/, "", field)
+        return field
     }
     {
-        n = split($0, arr, FS);
-        result = "";
-        inside_quotes = 0;
-        merged = "";
+        result = ""
+        inside_quotes = 0
+        merged = ""
+        n = split($0, arr, FS)
         for (i = 1; i <= n; i++) {
             if (inside_quotes == 0 && arr[i] ~ q && arr[i] !~ q"$") {
-                inside_quotes = 1;
-                merged = arr[i];
+                inside_quotes = 1
+                merged = arr[i]
             } else if (inside_quotes == 1) {
-                merged = merged FS arr[i];
+                merged = merged FS arr[i]
                 if (arr[i] ~ q"$") {
-                    inside_quotes = 0;
-                    arr[i] = merged;
+                    inside_quotes = 0
+                    arr[i] = merged
                 } else {
-                    continue;
+                    continue
                 }
             }
             if (inside_quotes == 0) {
-                arr[i] = clean_field(arr[i]);
-                result = result arr[i] (i < n ? OFS : "");
+                arr[i] = clean_field(arr[i])
+                result = result arr[i] (i < n ? FS : "")
             }
         }
-        print result;
+        print result
     }'
 }
 
@@ -106,25 +105,25 @@ else
     CSCLI_ALERTS=$(echo "$CSCLI_ALERTS_RAW" | while read -r line; do
         parse_csv_line "$line"
     done | awk 'BEGIN {
-        OFS = "</td><td>";
-        print "<table border=\"1\"><tr><th>ID</th><th>Scope</th><th>Value</th><th>Reason</th><th>Country</th><th>AS</th><th>Decisions</th><th>Created At</th></tr>";
+        OFS = "</td><td>"
+        print "<table border=\"1\"><tr><th>ID</th><th>Scope</th><th>Value</th><th>Reason</th><th>Country</th><th>AS</th><th>Decisions</th><th>Created At</th></tr>"
     }
     NR > 1 {
-        id = $1;
-        scope = $2;
-        value = $3;
-        reason = $4;
-        country = $5;
-        as_field = $6;
-        decisions = $7;
-        created_at = $8;
+        id = $1
+        scope = $2
+        value = $3
+        reason = $4
+        country = $5
+        as_field = $6
+        decisions = $7
+        created_at = $8
         for (i = 9; i <= NF; i++) {
-            created_at = created_at " " $i;
+            created_at = created_at " " $i
         }
-        printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", id, scope, value, reason, country, as_field, decisions, created_at;
+        printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", id, scope, value, reason, country, as_field, decisions, created_at
     }
     END {
-        print "</table>";
+        print "</table>"
     }')
 fi
 
@@ -136,28 +135,28 @@ else
     CSCLI_DECISIONS=$(echo "$CSCLI_DECISIONS_RAW" | while read -r line; do
         parse_csv_line "$line"
     done | awk 'BEGIN {
-        OFS = "</td><td>";
-        print "<table border=\"1\"><tr><th>ID</th><th>Source</th><th>IP</th><th>Reason</th><th>Action</th><th>Country</th><th>AS</th><th>Events Count</th><th>Expiration</th><th>Simulated</th><th>Alert ID</th></tr>";
+        OFS = "</td><td>"
+        print "<table border=\"1\"><tr><th>ID</th><th>Source</th><th>IP</th><th>Reason</th><th>Action</th><th>Country</th><th>AS</th><th>Events Count</th><th>Expiration</th><th>Simulated</th><th>Alert ID</th></tr>"
     }
     NR > 1 {
-        id = $1;
-        source = $2;
-        ip = $3;
-        reason = $4;
-        action = $5;
-        country = $6;
-        as_field = $7;
-        events_count = $8;
-        expiration = $9;
-        simulated = $10;
-        alert_id = $11;
+        id = $1
+        source = $2
+        ip = $3
+        reason = $4
+        action = $5
+        country = $6
+        as_field = $7
+        events_count = $8
+        expiration = $9
+        simulated = $10
+        alert_id = $11
         for (i = 12; i <= NF; i++) {
-            alert_id = alert_id " " $i;
+            alert_id = alert_id " " $i
         }
-        printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", id, source, ip, reason, action, country, as_field, events_count, expiration, simulated, alert_id;
+        printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", id, source, ip, reason, action, country, as_field, events_count, expiration, simulated, alert_id
     }
     END {
-        print "</table>";
+        print "</table>"
     }')
 fi
 
