@@ -62,49 +62,63 @@ SERVER_TIME=$(date)
 UPTIME_INFO=$(uptime -p)
 
 # Collect CrowdSec information
-CSCLI_ALERTS_RAW=$(cscli alerts list -o raw | sed 's/,/|/g')
+CSCLI_ALERTS_RAW=$(cscli alerts list -o raw)
 
 if [ -z "$CSCLI_ALERTS_RAW" ]; then
     CSCLI_ALERTS="<p>No CrowdSec alerts.</p>"
 else
-    CSCLI_ALERTS=$(echo "$CSCLI_ALERTS_RAW" | awk -F'|' 'BEGIN {
-        OFS="</td><td>"
-        print "<table border=\"1\"><tr><th>ID</th><th>Scope</th><th>Value</th><th>Reason</th><th>Country</th><th>AS</th><th>Decisions</th><th>Created At</th></tr>"
-        header_skipped = 0
+    CSCLI_ALERTS=$(echo "$CSCLI_ALERTS_RAW" | awk 'BEGIN {
+        FS = ",";
+        OFS = "</td><td>";
+        print "<table border=\"1\"><tr><th>ID</th><th>Scope</th><th>Value</th><th>Reason</th><th>Country</th><th>AS</th><th>Decisions</th><th>Created At</th></tr>";
+        header_skipped = 0;
     }
     NR > 1 {
-        gsub(/\"/, "")
+        gsub(/\"/, "");
         if (header_skipped == 0) {
-            header_skipped = 1
-            next
+            header_skipped = 1;
+            next;
         }
-        printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", $1, $2, $3, $4, $5, $6, $7, $8
+        split($6, as_parts, " ");
+        as_field = as_parts[1];
+        as_address = as_parts[2];
+        for (i = 3; i <= length(as_parts); i++) {
+            as_address = as_address " " as_parts[i];
+        }
+        printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s %s</td><td>%s</td><td>%s</td></tr>\n", $1, $2, $3, $4, $5, as_field, as_address, $7, $8;
     }
     END {
-        print "</table>"
+        print "</table>";
     }')
 fi
 
-CSCLI_DECISIONS_RAW=$(cscli decisions list -o raw | sed 's/,/|/g')
+CSCLI_DECISIONS_RAW=$(cscli decisions list -o raw)
 
 if [ -z "$CSCLI_DECISIONS_RAW" ]; then
     CSCLI_DECISIONS="<p>No CrowdSec decisions.</p>"
 else
-    CSCLI_DECISIONS=$(echo "$CSCLI_DECISIONS_RAW" | awk -F'|' 'BEGIN {
-        OFS="</td><td>"
-        print "<table border=\"1\"><tr><th>ID</th><th>Source</th><th>IP</th><th>Reason</th><th>Action</th><th>Country</th><th>AS</th><th>Events Count</th><th>Expiration</th><th>Simulated</th><th>Alert ID</th></tr>"
-        header_skipped = 0
+    CSCLI_DECISIONS=$(echo "$CSCLI_DECISIONS_RAW" | awk 'BEGIN {
+        FS = ",";
+        OFS = "</td><td>";
+        print "<table border=\"1\"><tr><th>ID</th><th>Source</th><th>IP</th><th>Reason</th><th>Action</th><th>Country</th><th>AS</th><th>Events Count</th><th>Expiration</th><th>Simulated</th><th>Alert ID</th></tr>";
+        header_skipped = 0;
     }
     NR > 1 {
-        gsub(/\"/, "")
+        gsub(/\"/, "");
         if (header_skipped == 0) {
-            header_skipped = 1
-            next
+            header_skipped = 1;
+            next;
         }
-        printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
+        split($6, as_parts, " ");
+        as_field = as_parts[1];
+        as_address = as_parts[2];
+        for (i = 3; i <= length(as_parts); i++) {
+            as_address = as_address " " as_parts[i];
+        }
+        printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s %s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", $1, $2, $3, $4, $5, as_field, as_address, $7, $8, $9, $10, $11;
     }
     END {
-        print "</table>"
+        print "</table>";
     }')
 fi
 
