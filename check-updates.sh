@@ -55,6 +55,45 @@ END {
 
 FORMATTED_DISK_INFO="<table border='1'>$DISK_INFO</table>"
 
+CPU_LOAD_INFO=$(top -bn1 | grep "load avg: " | awk '{print $12 $13 $14}')
+
+MEMORY_INFO=$(free -h | awk '
+BEGIN {
+    OFS="</td><td>"
+    print "<table border=\"1\">"
+}
+NR==2 {
+    print "<tr><th>" $1 "</th><th>" $2 "</th><th>" $3 "</th><th>" $4 "</th><th>" $5 "</th></tr>"
+}
+NR>2 {
+    print "<tr><td>" $1 "</td><td>" $2 "</td><td>" $3 "</td><td>" $4 "</td><td>" $5 "</td></tr>"
+}
+END {
+    print "</table>"
+}')
+
+LOGGED_IN_USERS=$(who | awk '
+BEGIN {
+    print "<table border=\"1\"><tr><th>User</th><th>Terminal</th><th>Login Time</th><th>IP Address</th></tr>"
+}
+{
+        print "<tr><td>" $1 "</td><td>" $2 "</td><td>" $3 " " $4 "</td><td>" $5 "</td></tr>"
+}
+END {
+    print "</table>"
+}')
+
+NETWORK_INFO=$(ip -brief addr show | awk '
+BEGIN {
+    print "<table border=\"1\"><tr><th>Interface</th><th>State</th><th>IP Address</th></tr>"
+}
+{
+    print "<tr><td>" $1 "</td><td>" $2 "</td><td>" $3 "</td></tr>"
+}
+END {
+    print "</table>"
+}')
+
 # Collect server time
 SERVER_TIME=$(date)
 
@@ -85,6 +124,14 @@ $FORMATTED_UPGRADE_LIST
 $FORMATTED_DIST_UPGRADE_LIST
 <h2>Disk Information:</h2>
 $FORMATTED_DISK_INFO
+<h2>Memory Usage:</h2>
+$MEMORY_INFO
+<h2>CPU Load:</h2>
+<p>$CPU_LOAD</p>
+<h2>Logged-in Users:</h2>
+$LOGGED_IN_USERS
+<h2>Network Information:</h2>
+$NETWORK_INFO
 <h2>Server Time:</h2>
 <p>$SERVER_TIME</p>
 <h2>Uptime:</h2>
