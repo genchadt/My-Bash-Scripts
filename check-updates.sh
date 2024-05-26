@@ -70,9 +70,14 @@ else
     CSCLI_ALERTS=$(echo "$CSCLI_ALERTS_RAW" | awk -F, 'BEGIN {
         OFS="</td><td>"
         print "<table border=\"1\"><tr><th>ID</th><th>Scope</th><th>Value</th><th>Reason</th><th>Country</th><th>AS</th><th>Decisions</th><th>Created At</th></tr>"
+        header_skipped = 0
     }
-    {
+    NR > 1 {
         gsub(/\"/, "")
+        if (header_skipped == 0) {
+            header_skipped = 1
+            next
+        }
         printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", $1, $2, $3, $4, $5, $6, $7, $8
     }
     END {
@@ -88,9 +93,14 @@ else
     CSCLI_DECISIONS=$(echo "$CSCLI_DECISIONS_RAW" | awk -F, 'BEGIN {
         OFS="</td><td>"
         print "<table border=\"1\"><tr><th>ID</th><th>Source</th><th>IP</th><th>Reason</th><th>Action</th><th>Country</th><th>AS</th><th>Events Count</th><th>Expiration</th><th>Simulated</th><th>Alert ID</th></tr>"
+        header_skipped = 0
     }
-    {
+    NR > 1 {
         gsub(/\"/, "")
+        if (header_skipped == 0) {
+            header_skipped = 1
+            next
+        }
         printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
     }
     END {
