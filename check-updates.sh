@@ -66,13 +66,13 @@ UPTIME_INFO=$(uptime -p)
 # Function to parse CSV line and handle quoted fields with commas
 parse_csv_line() {
     local line="$1"
-    echo "$line" | awk -v q='"' -F, '
+    echo "$line" | awk -v q='"' -v FS=',' -v OFS=',' '
     function trim_quotes(s) {
         gsub(/^"|"$/, "", s)
         return s
     }
     {
-        n = split($0, arr, /,/)
+        n = split($0, arr, /,/, seps)
         result = ""
         inside_quotes = 0
         merged = ""
@@ -81,7 +81,7 @@ parse_csv_line() {
                 inside_quotes = 1
                 merged = arr[i]
             } else if (inside_quotes == 1) {
-                merged = merged "," arr[i]
+                merged = merged seps[i] arr[i]
                 if (arr[i] ~ q"$") {
                     inside_quotes = 0
                     arr[i] = merged
