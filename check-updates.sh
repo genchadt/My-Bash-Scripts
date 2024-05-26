@@ -62,12 +62,12 @@ SERVER_TIME=$(date)
 UPTIME_INFO=$(uptime -p)
 
 # Collect CrowdSec information
-CSCLI_ALERTS_RAW=$(cscli alerts list -o raw)
+CSCLI_ALERTS_RAW=$(cscli alerts list -o raw | sed 's/,/|/g')
 
 if [ -z "$CSCLI_ALERTS_RAW" ]; then
     CSCLI_ALERTS="<p>No CrowdSec alerts.</p>"
 else
-    CSCLI_ALERTS=$(echo "$CSCLI_ALERTS_RAW" | awk -F, 'BEGIN {
+    CSCLI_ALERTS=$(echo "$CSCLI_ALERTS_RAW" | awk -F'|' 'BEGIN {
         OFS="</td><td>"
         print "<table border=\"1\"><tr><th>ID</th><th>Scope</th><th>Value</th><th>Reason</th><th>Country</th><th>AS</th><th>Decisions</th><th>Created At</th></tr>"
         header_skipped = 0
@@ -85,12 +85,12 @@ else
     }')
 fi
 
-CSCLI_DECISIONS_RAW=$(cscli decisions list -o raw)
+CSCLI_DECISIONS_RAW=$(cscli decisions list -o raw | sed 's/,/|/g')
 
 if [ -z "$CSCLI_DECISIONS_RAW" ]; then
     CSCLI_DECISIONS="<p>No CrowdSec decisions.</p>"
 else
-    CSCLI_DECISIONS=$(echo "$CSCLI_DECISIONS_RAW" | awk -F, 'BEGIN {
+    CSCLI_DECISIONS=$(echo "$CSCLI_DECISIONS_RAW" | awk -F'|' 'BEGIN {
         OFS="</td><td>"
         print "<table border=\"1\"><tr><th>ID</th><th>Source</th><th>IP</th><th>Reason</th><th>Action</th><th>Country</th><th>AS</th><th>Events Count</th><th>Expiration</th><th>Simulated</th><th>Alert ID</th></tr>"
         header_skipped = 0
