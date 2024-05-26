@@ -64,39 +64,59 @@ UPTIME_INFO=$(uptime -p)
 # Collect CrowdSec information
 CSCLI_ALERTS_RAW=$(cscli alerts list -o raw)
 
+parse_csv_line() {
+    awk -F, '
+    function trim_quotes(s) {
+        gsub(/^"|"$/, "", s)
+        return s
+    }
+    {
+        n = split($0, arr, /, */)
+        result = ""
+        for (i = 1; i <= n; i++) {
+            if (arr[i] ~ /^"/ && arr[i] !~ /"$/) {
+                merged = arr[i]
+                for (j = i + 1; j <= n; j++) {
+                    merged = merged "," arr[j]
+                    if (arr[j] ~ /"$/) {
+                        break
+                    }
+                }
+                arr[i] = merged
+                for (k = i + 1; k <= j; k++) {
+                    arr[k] = ""
+                }
+                i = j
+            }
+            arr[i] = trim_quotes(arr[i])
+            result = result arr[i] (i < n ? FS : "")
+        }
+        print result
+    }' <<< "$1"
+}
+
 if [ -z "$CSCLI_ALERTS_RAW" ]; then
     CSCLI_ALERTS="<p>No CrowdSec alerts.</p>"
 else
-    CSCLI_ALERTS=$(echo "$CSCLI_ALERTS_RAW" | awk 'BEGIN {
-        FS = ",";
+    CSCLI_ALERTS=$(echo "$CSCLI_ALERTS_RAW" | while read -r line; do
+        parse_csv_line "$line"
+    done | awk 'BEGIN {
         OFS = "</td><td>";
         print "<table border=\"1\"><tr><th>ID</th><th>Scope</th><th>Value</th><th>Reason</th><th>Country</th><th>AS</th><th>Decisions</th><th>Created At</th></tr>";
     }
     NR > 1 {
-        # Remove quotes
-        gsub(/\"/, "");
-
-        # Use a different separator to split fields, then recombine fields that belong together
-        n = split($0, fields, ",");
-        id = fields[1];
-        scope = fields[2];
-        value = fields[3];
-        reason = fields[4];
-        country = fields[5];
-        
-        # Combine the AS field which may contain commas and spaces
-        as_field = fields[6];
-        as_address = fields[7];
-        i = 8;
-        while (i <= n-3) {
-            as_address = as_address ", " fields[i];
-            i++;
+        id = $1;
+        scope = $2;
+        value = $3;
+        reason = $4;
+        country = $5;
+        as_field = $6;
+        decisions = $7;
+        created_at = $8;
+        for (i = 9; i <= NF; i++) {
+            created_at = created_at " " $i;
         }
-
-        decisions = fields[n-2];
-        created_at = fields[n-1] " " fields[n];
-
-        printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s, %s</td><td>%s</td><td>%s</td></tr>\n", id, scope, value, reason, country, as_field, as_address, decisions, created_at;
+        printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", id, scope, value, reason, country, as_field, decisions, created_at;
     }
     END {
         print "</table>";
@@ -108,39 +128,28 @@ CSCLI_DECISIONS_RAW=$(cscli decisions list -o raw)
 if [ -z "$CSCLI_DECISIONS_RAW" ]; then
     CSCLI_DECISIONS="<p>No CrowdSec decisions.</p>"
 else
-    CSCLI_DECISIONS=$(echo "$CSCLI_DECISIONS_RAW" | awk 'BEGIN {
-        FS = ",";
+    CSCLI_DECISIONS=$(echo "$CSCLI_DECISIONS_RAW" | while read -r line; do
+        parse_csv_line "$line"
+    done | awk 'BEGIN {
         OFS = "</td><td>";
         print "<table border=\"1\"><tr><th>ID</th><th>Source</th><th>IP</th><th>Reason</th><th>Action</th><th>Country</th><th>AS</th><th>Events Count</th><th>Expiration</th><th>Simulated</th><th>Alert ID</th></tr>";
     }
     NR > 1 {
-        # Remove quotes
-        gsub(/\"/, "");
-
-        # Use a different separator to split fields, then recombine fields that belong together
-        n = split($0, fields, ",");
-        id = fields[1];
-        source = fields[2];
-        ip = fields[3];
-        reason = fields[4];
-        action = fields[5];
-        country = fields[6];
-        
-        # Combine the AS field which may contain commas and spaces
-        as_field = fields[7];
-        as_address = fields[8];
-        i = 9;
-        while (i <= n-5) {
-            as_address = as_address ", " fields[i];
-            i++;
+        id = $1;
+        source = $2;
+        ip = $3;
+        reason = $4;
+        action = $5;
+        country = $6;
+        as_field = $7;
+        events_count = $8;
+        expiration = $9;
+        simulated = $10;
+        alert_id = $11;
+        for (i = 12; i <= NF; i++) {
+            alert_id = alert_id " " $i;
         }
-
-        events_count = fields[n-4];
-        expiration = fields[n-3];
-        simulated = fields[n-2];
-        alert_id = fields[n-1] " " fields[n];
-
-        printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s, %s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", id, source, ip, reason, action, country, as_field, as_address, events_count, expiration, simulated, alert_id;
+        printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", id, source, ip, reason, action, country, as_field, events_count, expiration, simulated, alert_id;
     }
     END {
         print "</table>";
