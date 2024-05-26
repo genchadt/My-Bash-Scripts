@@ -64,11 +64,7 @@ UPTIME_INFO=$(uptime -p)
 # Function to parse CSV line and handle quoted fields with commas
 parse_csv_line() {
     local line="$1"
-    echo "$line" | sed -e 's/\r//g' | awk '
-    BEGIN {
-        FS = OFS = ",";
-        q = "\"";
-    }
+    echo "$line" | awk -v q='"' -v FS=',' -v OFS=',' '
     function clean_field(field) {
         gsub(/^"|"$/, "", field);
         gsub(/""/, q, field);
@@ -164,10 +160,6 @@ else
         print "</table>";
     }')
 fi
-
-# Print the results
-echo "$CSCLI_ALERTS"
-echo "$CSCLI_DECISIONS"
 
 # Combine all information into one message
 EMAIL_BODY=$(cat << EOF
