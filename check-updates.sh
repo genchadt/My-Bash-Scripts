@@ -61,18 +61,16 @@ SERVER_TIME=$(date)
 # Collect uptime
 UPTIME_INFO=$(uptime -p)
 
-#!/bin/bash
-
 # Function to parse CSV line and handle quoted fields with commas
 parse_csv_line() {
     local line="$1"
-    echo "$line" | awk -v q='"' -v FS=',' -v OFS=',' '
+    echo "$line" | awk -v q='"' -F, '
     function trim_quotes(s) {
         gsub(/^"|"$/, "", s)
         return s
     }
     {
-        n = split($0, arr, /,/, seps)
+        n = split($0, arr, ",")
         result = ""
         inside_quotes = 0
         merged = ""
@@ -81,7 +79,7 @@ parse_csv_line() {
                 inside_quotes = 1
                 merged = arr[i]
             } else if (inside_quotes == 1) {
-                merged = merged seps[i] arr[i]
+                merged = merged "," arr[i]
                 if (arr[i] ~ q"$") {
                     inside_quotes = 0
                     arr[i] = merged
@@ -91,7 +89,7 @@ parse_csv_line() {
             }
             if (inside_quotes == 0) {
                 arr[i] = trim_quotes(arr[i])
-                result = result arr[i] (i < n ? OFS : "")
+                result = result arr[i] (i < n ? FS : "")
             }
         }
         print result
