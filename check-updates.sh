@@ -119,27 +119,27 @@ EMAIL_BODY=$(cat << EOF
 <html>
 <body>
 <h2>Available Package Updates:</h2>
-$FORMATTED_UPGRADE_LIST
+<p>$FORMATTED_UPGRADE_LIST</p>
 <h2>Available Distribution Upgrades:</h2>
-$FORMATTED_DIST_UPGRADE_LIST
+<p>$FORMATTED_DIST_UPGRADE_LIST</p>
 <h2>Disk Information:</h2>
-$FORMATTED_DISK_INFO
+<p>$FORMATTED_DISK_INFO</p>
 <h2>Memory Usage:</h2>
-$MEMORY_INFO
+<p>$MEMORY_INFO</p>
 <h2>CPU Load:</h2>
 <p>$CPU_LOAD</p>
 <h2>Logged-in Users:</h2>
-$LOGGED_IN_USERS
+<p>$LOGGED_IN_USERS</p>
 <h2>Network Information:</h2>
-$NETWORK_INFO
+<p>$NETWORK_INFO</p>
 <h2>Server Time:</h2>
 <p>$SERVER_TIME</p>
 <h2>Uptime:</h2>
 <p>$UPTIME_INFO</p>
 <h2>CrowdSec Alerts:</h2>
-$CSCLI_ALERTS
+<p>$CSCLI_ALERTS</p>
 <h2>CrowdSec Decisions:</h2>
-$CSCLI_DECISIONS
+<p>$CSCLI_DECISIONS</p>
 </body>
 </html>
 EOF
