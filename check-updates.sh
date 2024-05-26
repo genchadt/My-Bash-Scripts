@@ -71,14 +71,14 @@ csv_to_html_table() {
     local html_table="<table border=\"1\"><tr>"
 
     # Read the header and create table headers
-    IFS=',' read -r -a headers <<< "$(echo "$csv_data" | head -n 1)"
+    IFS=',' read -ra headers <<< "$(echo "$csv_data" | head -n 1)"
     for header in "${headers[@]}"; do
         html_table+="<th>${header}</th>"
     done
     html_table+="</tr>"
 
     # Read each line and create table rows
-    while IFS=',' read -r -a line; do
+    while IFS=',' read -ra line; do
         html_table+="<tr>"
         for field in "${line[@]}"; do
             html_table+="<td>${field}</td>"
