@@ -63,10 +63,39 @@ UPTIME_INFO=$(uptime -p)
 
 #!/bin/bash
 
-# Function to parse CSV line and handle quoted fields with commas using csvkit
+# Function to parse CSV line and handle quoted fields with commas
 parse_csv_line() {
     local line="$1"
-    echo "$line" | csvformat -T -U 1 | tr '\t' ','
+    echo "$line" | awk -v q='"' -F, '
+    function trim_quotes(s) {
+        gsub(/^"|"$/, "", s)
+        return s
+    }
+    {
+        n = split($0, arr, /,/)
+        result = ""
+        inside_quotes = 0
+        merged = ""
+        for (i = 1; i <= n; i++) {
+            if (inside_quotes == 0 && arr[i] ~ q && arr[i] !~ q"$") {
+                inside_quotes = 1
+                merged = arr[i]
+            } else if (inside_quotes == 1) {
+                merged = merged "," arr[i]
+                if (arr[i] ~ q"$") {
+                    inside_quotes = 0
+                    arr[i] = merged
+                } else {
+                    continue
+                }
+            }
+            if (inside_quotes == 0) {
+                arr[i] = trim_quotes(arr[i])
+                result = result arr[i] (i < n ? OFS : "")
+            }
+        }
+        print result
+    }'
 }
 
 # Collect CrowdSec information
