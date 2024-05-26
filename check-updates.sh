@@ -73,8 +73,7 @@ else
     }
     {
         gsub(/\"/, "")
-        $1=$1
-        printf "<tr><td>%s</td></tr>\n", $0
+        printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", $1, $2, $3, $4, $5, $6, $7, $8
     }
     END {
         print "</table>"
@@ -92,8 +91,7 @@ else
     }
     {
         gsub(/\"/, "")
-        $1=$1
-        printf "<tr><td>%s</td></tr>\n", $0
+        printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
     }
     END {
         print "</table>"
