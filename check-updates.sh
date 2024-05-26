@@ -67,28 +67,36 @@ CSCLI_ALERTS_RAW=$(cscli alerts list -o raw)
 if [ -z "$CSCLI_ALERTS_RAW" ]; then
     CSCLI_ALERTS="<p>No CrowdSec alerts.</p>"
 else
-    CSCLI_ALERTS=$(echo "$CSCLI_ALERTS_RAW" | awk -v OFS="</td><td>" 'BEGIN {
+    CSCLI_ALERTS=$(echo "$CSCLI_ALERTS_RAW" | awk 'BEGIN {
+        FS = ",";
+        OFS = "</td><td>";
         print "<table border=\"1\"><tr><th>ID</th><th>Scope</th><th>Value</th><th>Reason</th><th>Country</th><th>AS</th><th>Decisions</th><th>Created At</th></tr>";
     }
     NR > 1 {
-        gsub(/\"/, ""); # Remove quotes
+        # Remove quotes
+        gsub(/\"/, "");
+
+        # Use a different separator to split fields, then recombine fields that belong together
         n = split($0, fields, ",");
         id = fields[1];
         scope = fields[2];
         value = fields[3];
         reason = fields[4];
         country = fields[5];
-
-        # Handle the AS field which may contain commas
-        as_field = fields[6];
-        for (i = 7; i <= n-3; i++) {
-            as_field = as_field ", " fields[i];
-        }
         
+        # Combine the AS field which may contain commas and spaces
+        as_field = fields[6];
+        as_address = fields[7];
+        i = 8;
+        while (i <= n-3) {
+            as_address = as_address ", " fields[i];
+            i++;
+        }
+
         decisions = fields[n-2];
         created_at = fields[n-1] " " fields[n];
 
-        printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", id, scope, value, reason, country, as_field, decisions, created_at;
+        printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s, %s</td><td>%s</td><td>%s</td></tr>\n", id, scope, value, reason, country, as_field, as_address, decisions, created_at;
     }
     END {
         print "</table>";
@@ -100,11 +108,16 @@ CSCLI_DECISIONS_RAW=$(cscli decisions list -o raw)
 if [ -z "$CSCLI_DECISIONS_RAW" ]; then
     CSCLI_DECISIONS="<p>No CrowdSec decisions.</p>"
 else
-    CSCLI_DECISIONS=$(echo "$CSCLI_DECISIONS_RAW" | awk -v OFS="</td><td>" 'BEGIN {
+    CSCLI_DECISIONS=$(echo "$CSCLI_DECISIONS_RAW" | awk 'BEGIN {
+        FS = ",";
+        OFS = "</td><td>";
         print "<table border=\"1\"><tr><th>ID</th><th>Source</th><th>IP</th><th>Reason</th><th>Action</th><th>Country</th><th>AS</th><th>Events Count</th><th>Expiration</th><th>Simulated</th><th>Alert ID</th></tr>";
     }
     NR > 1 {
-        gsub(/\"/, ""); # Remove quotes
+        # Remove quotes
+        gsub(/\"/, "");
+
+        # Use a different separator to split fields, then recombine fields that belong together
         n = split($0, fields, ",");
         id = fields[1];
         source = fields[2];
@@ -112,11 +125,14 @@ else
         reason = fields[4];
         action = fields[5];
         country = fields[6];
-
-        # Handle the AS field which may contain commas
+        
+        # Combine the AS field which may contain commas and spaces
         as_field = fields[7];
-        for (i = 8; i <= n-5; i++) {
-            as_field = as_field ", " fields[i];
+        as_address = fields[8];
+        i = 9;
+        while (i <= n-5) {
+            as_address = as_address ", " fields[i];
+            i++;
         }
 
         events_count = fields[n-4];
@@ -124,7 +140,7 @@ else
         simulated = fields[n-2];
         alert_id = fields[n-1] " " fields[n];
 
-        printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", id, source, ip, reason, action, country, as_field, events_count, expiration, simulated, alert_id;
+        printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s, %s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", id, source, ip, reason, action, country, as_field, as_address, events_count, expiration, simulated, alert_id;
     }
     END {
         print "</table>";
