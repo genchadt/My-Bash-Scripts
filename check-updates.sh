@@ -61,27 +61,25 @@ SERVER_TIME=$(date)
 # Collect uptime
 UPTIME_INFO=$(uptime -p)
 
+if ! command -v csvtool &> /dev/null
+then
+    echo "csvtool could not be found, please install it."
+    exit 1
+fi
+
 # Extract and format CrowdSec alerts
-CSCLI_ALERTS=$(cscli alerts list -o raw | awk -F',' 'BEGIN {
-    print "<table border=\"1\"><tr><th>ID</th><th>Scope</th><th>Value</th><th>Reason</th><th>Country</th><th>AS</th><th>Decisions</th><th>Created At</th></tr>"
-}
-NR>1 {
-    printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", $1, $2, $3, $4, $5, $6, $7, $8
-}
-END {
-    print "</table>"
-}')
+CSCLI_ALERTS=$(cscli alerts list -o raw | csvtool format '<tr><td>%1</td><td>%2</td><td>%3</td><td>%4</td><td>%5</td><td>%6</td><td>%7</td><td>%8</td></tr>\n' - | {
+    echo "<table border=\"1\"><tr><th>ID</th><th>Scope</th><th>Value</th><th>Reason</th><th>Country</th><th>AS</th><th>Decisions</th><th>Created At</th></tr>"
+    cat
+    echo "</table>"
+})
 
 # Extract and format CrowdSec decisions
-CSCLI_DECISIONS=$(cscli decisions list -o raw | awk -F',' 'BEGIN {
-    print "<table border=\"1\"><tr><th>ID</th><th>Source</th><th>IP</th><th>Reason</th><th>Action</th><th>Country</th><th>AS</th><th>Events Count</th><th>Expiration</th><th>Simulated</th><th>Alert ID</th></tr>"
-}
-NR>1 {
-    printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
-}
-END {
-    print "</table>"
-}')
+CSCLI_DECISIONS=$(cscli decisions list -o raw | csvtool format '<tr><td>%1</td><td>%2</td><td>%3</td><td>%4</td><td>%5</td><td>%6</td><td>%7</td><td>%8</td><td>%9</td><td>%10</td><td>%11</td></tr>\n' - | {
+    echo "<table border=\"1\"><tr><th>ID</th><th>Source</th><th>IP</th><th>Reason</th><th>Action</th><th>Country</th><th>AS</th><th>Events Count</th><th>Expiration</th><th>Simulated</th><th>Alert ID</th></tr>"
+    cat
+    echo "</table>"
+})
 
 # Combine all information into one message
 EMAIL_BODY=$(cat << EOF
