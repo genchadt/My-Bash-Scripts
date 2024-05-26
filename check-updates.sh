@@ -68,29 +68,41 @@ if [ -z "$CSCLI_ALERTS_RAW" ]; then
     CSCLI_ALERTS="<p>No CrowdSec alerts.</p>"
 else
     CSCLI_ALERTS=$(echo "$CSCLI_ALERTS_RAW" | awk 'BEGIN {
-        OFS = "</td><td>";
+        OFS="</td><td>";
         print "<table border=\"1\"><tr><th>ID</th><th>Scope</th><th>Value</th><th>Reason</th><th>Country</th><th>AS</th><th>Decisions</th><th>Created At</th></tr>";
     }
     NR > 1 {
+        # Remove quotes
         gsub(/\"/, "", $0);
+
+        # Parse fields manually to handle commas within quoted fields
         id = $1;
         scope = $2;
         value = $3;
         reason = $4;
         country = $5;
-        as_field = $6;
-        as_address = $7;
-        decisions = $8;
-        created_at = $9;
-        for (i = 10; i <= NF; i++) {
-            created_at = created_at " " $i;
-        }
-        if (match(as_field, /, /)) {
-            split(as_field, as_parts, ", ");
+
+        # Handle the AS field and the address
+        as_field = "";
+        as_address = "";
+        split($6, as_parts, ", ");
+        if (length(as_parts) > 1) {
             as_field = as_parts[1];
             as_address = as_parts[2];
+            for (i = 3; i <= length(as_parts); i++) {
+                as_address = as_address ", " as_parts[i];
+            }
+        } else {
+            as_field = $6;
         }
-        printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s, %s</td><td>%s</td><td>%s</td></tr>\n", id, scope, value, reason, country, as_field, as_address, decisions, created_at;
+
+        decisions = $7;
+        created_at = $8;
+        for (i = 9; i <= NF; i++) {
+            created_at = created_at " " $i;
+        }
+
+        printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s %s</td><td>%s</td><td>%s</td></tr>\n", id, scope, value, reason, country, as_field, as_address, decisions, created_at;
     }
     END {
         print "</table>";
@@ -103,32 +115,44 @@ if [ -z "$CSCLI_DECISIONS_RAW" ]; then
     CSCLI_DECISIONS="<p>No CrowdSec decisions.</p>"
 else
     CSCLI_DECISIONS=$(echo "$CSCLI_DECISIONS_RAW" | awk 'BEGIN {
-        OFS = "</td><td>";
+        OFS="</td><td>";
         print "<table border=\"1\"><tr><th>ID</th><th>Source</th><th>IP</th><th>Reason</th><th>Action</th><th>Country</th><th>AS</th><th>Events Count</th><th>Expiration</th><th>Simulated</th><th>Alert ID</th></tr>";
     }
     NR > 1 {
+        # Remove quotes
         gsub(/\"/, "", $0);
+
+        # Parse fields manually to handle commas within quoted fields
         id = $1;
         source = $2;
         ip = $3;
         reason = $4;
         action = $5;
         country = $6;
-        as_field = $7;
-        as_address = $8;
-        events_count = $9;
-        expiration = $10;
-        simulated = $11;
-        alert_id = $12;
-        for (i = 13; i <= NF; i++) {
-            alert_id = alert_id " " $i;
-        }
-        if (match(as_field, /, /)) {
-            split(as_field, as_parts, ", ");
+
+        # Handle the AS field and the address
+        as_field = "";
+        as_address = "";
+        split($7, as_parts, ", ");
+        if (length(as_parts) > 1) {
             as_field = as_parts[1];
             as_address = as_parts[2];
+            for (i = 3; i <= length(as_parts); i++) {
+                as_address = as_address ", " as_parts[i];
+            }
+        } else {
+            as_field = $7;
         }
-        printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s, %s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", id, source, ip, reason, action, country, as_field, as_address, events_count, expiration, simulated, alert_id;
+
+        events_count = $8;
+        expiration = $9;
+        simulated = $10;
+        alert_id = $11;
+        for (i = 12; i <= NF; i++) {
+            alert_id = alert_id " " $i;
+        }
+
+        printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s %s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", id, source, ip, reason, action, country, as_field, as_address, events_count, expiration, simulated, alert_id;
     }
     END {
         print "</table>";
