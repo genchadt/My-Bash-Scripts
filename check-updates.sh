@@ -55,7 +55,7 @@ END {
 
 FORMATTED_DISK_INFO="<table border='1'>$DISK_INFO</table>"
 
-CPU_LOAD_INFO=$(top -bn1 | grep "load avg: " | awk '{print $12 $13 $14}')
+CPU_LOAD_INFO=$(uptime | awk -F'load average:' '{ print $2 }' | xargs)
 
 # Collect memory usage
 MEMORY_INFO=$(free -h | awk '
