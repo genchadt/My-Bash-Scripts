@@ -64,32 +64,40 @@ UPTIME_INFO=$(uptime -p)
 # Function to parse CSV line and handle quoted fields with commas
 parse_csv_line() {
     local line="$1"
-    echo "$line" | awk -F, '
-    function trim_quotes(s) {
-        gsub(/^"|"$/, "", s)
-        return s
+    echo "$line" | sed -e 's/\r//g' | awk '
+    BEGIN {
+        FS = OFS = ",";
+        q = "\"";
+    }
+    function clean_field(field) {
+        gsub(/^"|"$/, "", field);
+        gsub(/""/, q, field);
+        return field;
     }
     {
-        n = split($0, arr, /, */)
-        result = ""
-        inside_quotes = 0
+        n = split($0, arr, FS);
+        result = "";
+        inside_quotes = 0;
+        merged = "";
         for (i = 1; i <= n; i++) {
-            if (inside_quotes == 0 && arr[i] ~ /^"/ && arr[i] !~ /"$/) {
-                inside_quotes = 1
-                merged = arr[i]
+            if (inside_quotes == 0 && arr[i] ~ q && arr[i] !~ q"$") {
+                inside_quotes = 1;
+                merged = arr[i];
             } else if (inside_quotes == 1) {
-                merged = merged "," arr[i]
-                if (arr[i] ~ /"$/) {
-                    inside_quotes = 0
-                    arr[i] = merged
+                merged = merged FS arr[i];
+                if (arr[i] ~ q"$") {
+                    inside_quotes = 0;
+                    arr[i] = merged;
+                } else {
+                    continue;
                 }
             }
             if (inside_quotes == 0) {
-                arr[i] = trim_quotes(arr[i])
-                result = result arr[i] (i < n ? FS : "")
+                arr[i] = clean_field(arr[i]);
+                result = result arr[i] (i < n ? OFS : "");
             }
         }
-        print result
+        print result;
     }'
 }
 
@@ -156,6 +164,10 @@ else
         print "</table>";
     }')
 fi
+
+# Print the results
+echo "$CSCLI_ALERTS"
+echo "$CSCLI_DECISIONS"
 
 # Combine all information into one message
 EMAIL_BODY=$(cat << EOF
