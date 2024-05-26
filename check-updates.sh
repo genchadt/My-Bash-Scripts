@@ -61,38 +61,27 @@ SERVER_TIME=$(date)
 # Collect uptime
 UPTIME_INFO=$(uptime -p)
 
-# Fetch raw data from cscli commands
-ALERTS_RAW=$(cscli alerts list -o raw)
-DECISIONS_RAW=$(cscli decisions list -o raw)
-
-# Function to convert CSV to HTML table
-csv_to_html_table() {
-    local csv_data="$1"
-    local html_table="<table border=\"1\"><tr>"
-
-    # Read the header and create table headers
-    IFS=',' read -ra headers <<< "$(echo "$csv_data" | head -n 1)"
-    for header in "${headers[@]}"; do
-        html_table+="<th>${header}</th>"
-    done
-    html_table+="</tr>"
-
-    # Read each line and create table rows
-    while IFS=',' read -ra line; do
-        html_table+="<tr>"
-        for field in "${line[@]}"; do
-            html_table+="<td>${field}</td>"
-        done
-        html_table+="</tr>"
-    done < <(echo "$csv_data" | tail -n +2)
-
-    html_table+="</table>"
-    echo "$html_table"
+# Extract and format CrowdSec alerts
+CSCLI_ALERTS=$(cscli alerts list -o raw | awk -F',' 'BEGIN {
+    print "<table border=\"1\"><tr><th>ID</th><th>Scope</th><th>Value</th><th>Reason</th><th>Country</th><th>AS</th><th>Decisions</th><th>Created At</th></tr>"
 }
+NR>1 {
+    printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", $1, $2, $3, $4, $5, $6, $7, $8
+}
+END {
+    print "</table>"
+}')
 
-# Convert raw CSV data to HTML tables
-CSCLI_ALERTS=$(csv_to_html_table "$ALERTS_RAW")
-CSCLI_DECISIONS=$(csv_to_html_table "$DECISIONS_RAW")
+# Extract and format CrowdSec decisions
+CSCLI_DECISIONS=$(cscli decisions list -o raw | awk -F',' 'BEGIN {
+    print "<table border=\"1\"><tr><th>ID</th><th>Source</th><th>IP</th><th>Reason</th><th>Action</th><th>Country</th><th>AS</th><th>Events Count</th><th>Expiration</th><th>Simulated</th><th>Alert ID</th></tr>"
+}
+NR>1 {
+    printf "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
+}
+END {
+    print "</table>"
+}')
 
 # Combine all information into one message
 EMAIL_BODY=$(cat << EOF
