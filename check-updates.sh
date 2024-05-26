@@ -61,39 +61,16 @@ SERVER_TIME=$(date)
 # Collect uptime
 UPTIME_INFO=$(uptime -p)
 
+#!/bin/bash
+
+# Function to parse CSV line and handle quoted fields with commas using csvkit
+parse_csv_line() {
+    local line="$1"
+    echo "$line" | csvformat -T -U 1 | tr '\t' ','
+}
+
 # Collect CrowdSec information
 CSCLI_ALERTS_RAW=$(cscli alerts list -o raw)
-
-parse_csv_line() {
-    awk -F, '
-    function trim_quotes(s) {
-        gsub(/^"|"$/, "", s)
-        return s
-    }
-    {
-        n = split($0, arr, /, */)
-        result = ""
-        for (i = 1; i <= n; i++) {
-            if (arr[i] ~ /^"/ && arr[i] !~ /"$/) {
-                merged = arr[i]
-                for (j = i + 1; j <= n; j++) {
-                    merged = merged "," arr[j]
-                    if (arr[j] ~ /"$/) {
-                        break
-                    }
-                }
-                arr[i] = merged
-                for (k = i + 1; k <= j; k++) {
-                    arr[k] = ""
-                }
-                i = j
-            }
-            arr[i] = trim_quotes(arr[i])
-            result = result arr[i] (i < n ? FS : "")
-        }
-        print result
-    }' <<< "$1"
-}
 
 if [ -z "$CSCLI_ALERTS_RAW" ]; then
     CSCLI_ALERTS="<p>No CrowdSec alerts.</p>"
