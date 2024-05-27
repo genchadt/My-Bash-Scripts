@@ -61,7 +61,7 @@ BEGIN {
     print "<table border=\"1\"><tr><th>1 Minute Load</th><th>5 Minute Load</th><th>15 Minute Load</th></tr>"
 }
 {
-    print "<tr><td>" $1 " %</td><td>" $2 " %</td><td>" $3 " %</td></tr>"
+    print "<tr><td style=\"text-align:center\">" $1 " %</td><td style=\"text-align:center\">" $2 " %</td><td style=\"text-align:center\">" $3 " %</td></tr>"
 }
 END {
     print "</table>"
@@ -83,7 +83,7 @@ END {
     print "</table>"
 }')
 
-LOGGED_IN_USERS=$(who | awk '
+ACTIVE_SSH_SESSIONS=$(who | awk '
 BEGIN {
     print "<table border=\"1\"><tr><th>User</th><th>Terminal</th><th>Login Time</th><th>IP Address</th></tr>"
 }
@@ -133,8 +133,8 @@ EMAIL_BODY=$(cat << EOF
 <p>$MEMORY_INFO</p>
 <h2>CPU Load:</h2>
 <p>$FORMATTED_CPU_LOAD_INFO</p>
-<h2>Logged-in Users:</h2>
-<p>$LOGGED_IN_USERS</p>
+<h2>Active SSH Sessions:</h2>
+<p>$ACTIVE_SSH_SESSIONS</p>
 <h2>Network Information:</h2>
 <p>$NETWORK_INFO</p>
 <h2>Server Time:</h2>
