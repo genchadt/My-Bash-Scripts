@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SERVER_NAME=$(hostname)
+SERVER_HOSTNAME="Lightsail Web"
 SERVER_TIME=$(date)
 UPTIME_INFO=$(uptime -p)
 
@@ -176,7 +176,7 @@ function toggleSpoiler(id) {
 </script>
 </head>
 <body>
-<h1>Server Status Report: <span class="spoiler" id="serverName" onclick="toggleSpoiler('serverName')">$SERVER_NAME</span></h1>
+<h1>Server Status Report: $SERVER_HOSTNAME</h1>
 <h2>Server Time:</h2>
 <p>$SERVER_TIME</p>
 <h2>Uptime:</h2>
