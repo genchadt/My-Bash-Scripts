@@ -55,7 +55,18 @@ END {
 
 FORMATTED_DISK_INFO="<table border='1'>$DISK_INFO</table>"
 
-CPU_LOAD_INFO=$(uptime | awk -F'load average:' '{ print $2 }' | xargs | awk '{print "1 min: " $1 ", 5 min: " $2 ", 15 min: " $3}')
+# Collect CPU load information
+CPU_LOAD=$(uptime | awk -F'load average:' '{ print $2 }' | xargs)
+FORMATTED_CPU_LOAD_INFO=$(echo "$CPU_LOAD" | awk '
+BEGIN {
+    print "<table border=\"1\"><tr><th>1 Minute Load</th><th>5 Minute Load</th><th>15 Minute Load</th></tr>"
+}
+{
+    print "<tr><td>" $1 "</td><td>" $2 "</td><td>" $3 "</td></tr>"
+}
+END {
+    print "</table>"
+}')
 
 # Collect memory usage
 MEMORY_INFO=$(free -h | awk '
@@ -128,7 +139,7 @@ EMAIL_BODY=$(cat << EOF
 <h2>Memory Usage:</h2>
 <p>$MEMORY_INFO</p>
 <h2>CPU Load:</h2>
-<p>$CPU_LOAD_INFO</p>
+<p>$FORMATTED_CPU_LOAD_INFO</p>
 <h2>Logged-in Users:</h2>
 <p>$LOGGED_IN_USERS</p>
 <h2>Network Information:</h2>
