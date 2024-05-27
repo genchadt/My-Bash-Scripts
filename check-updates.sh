@@ -109,7 +109,7 @@ CSCLI_ALERTS=$(cscli alerts list -o raw | tail -n +2 | csvtool format '<tr><td><
 })
 
 # Extract and format CrowdSec decisions
-CSCLI_DECISIONS=$(cscli decisions list -o raw | tail -n +2 | csvtool format '<tr><td>%1</td><td>%2</td><td>%3</td><td>%4</td><td>%5</td><td>%6</td><td>%7</td><td>%8</td><td>%9</td><td>%10</td><td>%11</td></tr>\n' - | {
+CSCLI_DECISIONS=$(cscli decisions list -o raw | tail -n +2 | csvtool format '<tr><td><span style="pointer-events:none;">%1</span></td><td><span style="pointer-events:none;">%2</span></td><td><span style="pointer-events:none;">%3</span></td><td><span style="pointer-events:none;">%4</span></td><td><span style="pointer-events:none;">%5</span></td><td><span style="pointer-events:none;">%6</span></td><td><span style="pointer-events:none;">%7</span></td><td><span style="pointer-events:none;">%8</span></td><td><span style="pointer-events:none;">%9</span></td><td><span style="pointer-events:none;">%10</span></td><td><span style="pointer-events:none;">%11</span></td></tr>\n' - | {
     echo "<table border=\"1\"><tr><th>ID</th><th>Source</th><th>IP</th><th>Reason</th><th>Action</th><th>Country</th><th>AS</th><th>Events Count</th><th>Expiration</th><th>Simulated</th><th>Alert ID</th></tr>"
     cat
     echo "</table>"
