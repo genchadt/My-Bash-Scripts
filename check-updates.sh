@@ -1,10 +1,12 @@
 #!/bin/bash
 
-# Update package list
-apt-get update -y
+SERVER_TIME=$(date)
+UPTIME_INFO=$(uptime -p)
 
-# Collect package updates
+# Collect and format package and distribution updates
+apt-get update -y
 UPGRADE_LIST=$(apt list --upgradable 2>/dev/null | grep -E 'upgradable from' | awk -F'[][]' '{print $2 " " $3}')
+DIST_UPGRADE_LIST=$(apt-get -s dist-upgrade | grep "^Inst" | awk '{print $2}')
 
 if [ -z "$UPGRADE_LIST" ]; then
     FORMATTED_UPGRADE_LIST="<p>No package updates available.</p>"
@@ -22,9 +24,6 @@ EOF
     FORMATTED_UPGRADE_LIST+="</table>"
 fi
 
-# Collect distribution upgrades
-DIST_UPGRADE_LIST=$(apt-get -s dist-upgrade | grep "^Inst" | awk '{print $2}')
-
 if [ -z "$DIST_UPGRADE_LIST" ]; then
     FORMATTED_DIST_UPGRADE_LIST="<p>No distribution upgrades available.</p>"
 else
@@ -37,7 +36,7 @@ EOF
     FORMATTED_DIST_UPGRADE_LIST+="</table>"
 fi
 
-# Collect disk information
+# Collect and format disk information
 DISK_INFO=$(df -h | awk '
 BEGIN {
     OFS="</td><td>"
@@ -55,14 +54,14 @@ END {
 
 FORMATTED_DISK_INFO="<table border='1'>$DISK_INFO</table>"
 
-# Collect CPU load information
-CPU_LOAD=$(uptime | awk -F'load average:' '{ print $2 }' | xargs)
+# Collect and format CPU load information
+CPU_LOAD=$(uptime | awk -F'load average:' '{ print $2 }' | xargs | sed 's/,//g')
 FORMATTED_CPU_LOAD_INFO=$(echo "$CPU_LOAD" | awk '
 BEGIN {
     print "<table border=\"1\"><tr><th>1 Minute Load</th><th>5 Minute Load</th><th>15 Minute Load</th></tr>"
 }
 {
-    print "<tr><td>" $1 "</td><td>" $2 "</td><td>" $3 "</td></tr>"
+    print "<tr><td>" $1 " %</td><td>" $2 " %</td><td>" $3 " %</td></tr>"
 }
 END {
     print "</table>"
@@ -105,12 +104,6 @@ BEGIN {
 END {
     print "</table>"
 }')
-
-# Collect server time
-SERVER_TIME=$(date)
-
-# Collect uptime
-UPTIME_INFO=$(uptime -p)
 
 # Extract and format CrowdSec alerts
 CSCLI_ALERTS=$(cscli alerts list -o raw | tail -n +2 | csvtool format '<tr><td><span style="pointer-events:none;">%1</span></td><td><span style="pointer-events:none;">%2</span></td><td><span style="pointer-events:none;">%3</span></td><td><span style="pointer-events:none;">%4</span></td><td><span style="pointer-events:none;">%5</span></td><td><span style="pointer-events:none;">%6</span></td><td><span style="pointer-events:none;">%7</span></td><td><span style="pointer-events:none;">%8</span></td></tr>\n' - | {
