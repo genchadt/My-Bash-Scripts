@@ -1,5 +1,6 @@
 #!/bin/bash
 
+SERVER_NAME=$(hostname)
 SERVER_TIME=$(date)
 UPTIME_INFO=$(uptime -p)
 
@@ -119,10 +120,47 @@ CSCLI_DECISIONS=$(cscli decisions list -o raw | tail -n +2 | csvtool format '<tr
     echo "</table>"
 })
 
-# Combine all information into one message
 EMAIL_BODY=$(cat << EOF
 <html>
+<head>
+<style>
+body {
+    font-family: Arial, sans-serif;
+}
+h1 {
+    font-size: 24px;
+    color: #333333;
+}
+h2 {
+    font-size: 20px;
+    color: #555555;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+table, th, td {
+    border: 1px solid #dddddd;
+}
+th, td {
+    padding: 8px;
+    text-align: left;
+}
+th {
+    background-color: #f2f2f2;
+    color: #333333;
+}
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+</style>
+</head>
 <body>
+<h1>Server Status Report: $SERVER_NAME</h1>
+<h2>Server Time:</h2>
+<p>$SERVER_TIME</p>
+<h2>Uptime:</h2>
+<p>$UPTIME_INFO</p>
 <h2>Available Package Updates:</h2>
 <p>$FORMATTED_UPGRADE_LIST</p>
 <h2>Available Distribution Upgrades:</h2>
@@ -137,10 +175,6 @@ EMAIL_BODY=$(cat << EOF
 <p>$ACTIVE_SSH_SESSIONS</p>
 <h2>Network Information:</h2>
 <p>$NETWORK_INFO</p>
-<h2>Server Time:</h2>
-<p>$SERVER_TIME</p>
-<h2>Uptime:</h2>
-<p>$UPTIME_INFO</p>
 <h2>CrowdSec Alerts:</h2>
 <p>$CSCLI_ALERTS</p>
 <h2>CrowdSec Decisions:</h2>
