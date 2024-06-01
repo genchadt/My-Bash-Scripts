@@ -6,7 +6,7 @@ UPTIME_INFO=$(uptime -p)
 
 # Collect and format package and distribution updates
 apt-get update -y
-UPGRADE_LIST=$(apt list --upgradable 2>/dev/null | grep -E 'upgradable from' | awk -F'[][]' '{print $2 " " $3}')
+UPGRADE_LIST=$(apt list --upgradable 2>/dev/null | grep -E 'upgradable from' | awk -F' ' '{print $1 " " $5 " " $7}')
 
 if [ -z "$UPGRADE_LIST" ]; then
     FORMATTED_UPGRADE_LIST="<p>All packages are up to date.</p>"
