@@ -6,19 +6,22 @@ UPTIME_INFO=$(uptime -p)
 
 # Collect and format package and distribution updates
 apt-get update -y
-UPGRADE_LIST=$(apt list --upgradable 2>/dev/null | grep -E 'upgradable from' | awk -F ' ' '{print $1, $2, $4}')
+UPGRADE_LIST=$(apt list --upgradable 2>/dev/null | grep -E 'upgradable from' | awk -F'[][]' '{print $2 " " $3}')
 DIST_UPGRADE_LIST=$(apt-get -s dist-upgrade | grep "^Inst" | awk '{print $2}')
 
 if [ -z "$UPGRADE_LIST" ]; then
     FORMATTED_UPGRADE_LIST="<p>All packages are up to date.</p>"
 else
     FORMATTED_UPGRADE_LIST="<table border='1'><tr><th>Package</th><th>Current Version</th><th>New Version</th></tr>"
-    while IFS= read -r line; do
+    while read -r line; do
         PACKAGE=$(echo "$line" | awk '{print $1}')
-        CURRENT_VERSION=$(echo "$line" | awk '{print $2}')
-        NEW_VERSION=$(echo "$line" | awk '{print $3}')
+        VERSIONS=$(echo "$line" | awk '{print $2}')
+        CURRENT_VERSION=$(echo "$VERSIONS" | awk -F'/' '{print $1}')
+        NEW_VERSION=$(echo "$VERSIONS" | awk -F'/' '{print $2}')
         FORMATTED_UPGRADE_LIST+="<tr><td>${PACKAGE}</td><td>${CURRENT_VERSION}</td><td>${NEW_VERSION}</td></tr>"
-    done <<< "$UPGRADE_LIST"
+    done <<EOF
+$UPGRADE_LIST
+EOF
     FORMATTED_UPGRADE_LIST+="</table>"
 fi
 
@@ -26,9 +29,11 @@ if [ -z "$DIST_UPGRADE_LIST" ]; then
     FORMATTED_DIST_UPGRADE_LIST="<p>Distribution is up to date.</p>"
 else
     FORMATTED_DIST_UPGRADE_LIST="<table border='1'><tr><th>Package</th></tr>"
-    while IFS= read -r line; do
+    while read -r line; do
         FORMATTED_DIST_UPGRADE_LIST+="<tr><td>$line</td></tr>"
-    done <<< "$DIST_UPGRADE_LIST"
+    done <<EOF
+$DIST_UPGRADE_LIST
+EOF
     FORMATTED_DIST_UPGRADE_LIST+="</table>"
 fi
 
