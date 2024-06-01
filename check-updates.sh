@@ -6,16 +6,16 @@ UPTIME_INFO=$(uptime -p)
 
 # Collect and format package and distribution updates
 apt-get update -y
-UPGRADE_LIST=$(apt list --upgradable 2>/dev/null | grep -E 'upgradable from' | awk -F'[][]' '{print $1 " " $2}' | awk -F' ' '{print $1 " " $2 " " $NF}')
+UPGRADE_LIST=$(apt list --upgradable 2>/dev/null | grep -E 'upgradable from' | awk -F'[][]' '{print $1 " " $2}')
 
 if [ -z "$UPGRADE_LIST" ]; then
     FORMATTED_UPGRADE_LIST="<p>All packages are up to date.</p>"
 else
     FORMATTED_UPGRADE_LIST="<table border='1'><tr><th>Package</th><th>Current Version</th><th>New Version</th></tr>"
     while read -r line; do
-        PACKAGE=$(echo "$line" | awk -F'/' '{print $1}')
+        PACKAGE=$(echo "$line" | awk '{print $1}' | awk -F'/' '{print $1}')
+        NEW_VERSION=$(echo "$line" | awk '{print $2}')
         CURRENT_VERSION=$(echo "$line" | awk '{print $NF}')
-        NEW_VERSION=$(echo "$line" | awk '{print $(NF-2)}')
         FORMATTED_UPGRADE_LIST="${FORMATTED_UPGRADE_LIST}<tr><td>${PACKAGE}</td><td>${CURRENT_VERSION}</td><td>${NEW_VERSION}</td></tr>"
     done <<EOF
 $UPGRADE_LIST
@@ -169,8 +169,6 @@ function toggleSpoiler(id) {
 <p>$UPTIME_INFO</p>
 <h2>Available Package Updates:</h2>
 <p>$FORMATTED_UPGRADE_LIST</p>
-<h2>Available Distribution Upgrades:</h2>
-<p>$FORMATTED_DIST_UPGRADE_LIST</p>
 <h2>Disk Information:</h2>
 <p>$FORMATTED_DISK_INFO</p>
 <h2>Memory Usage:</h2>
