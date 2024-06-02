@@ -3,7 +3,7 @@
 # Server details && time
 SERVER_HOSTNAME="Lightsail Web"
 SERVER_TIME=$(date)
-UPTIME_INFO=$(uptime -p)
+SERVER_UPTIME=$(uptime -p)
 
 # Package update details
 apt-get update -y
@@ -175,7 +175,7 @@ function toggleSpoiler(id) {
 <h2>Server Time:</h2>
 <p>$SERVER_TIME</p>
 <h2>Uptime:</h2>
-<p>$UPTIME_INFO</p>
+<p>$SERVER_UPTIME</p>
 <h2>Available Package Updates:</h2>
 <p>$FORMATTED_UPGRADE_LIST</p>
 <h2>Disk Information:</h2>
