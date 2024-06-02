@@ -93,7 +93,7 @@ END {
 
 # CrowdSec alerts && decisions
 CSCLI_ALERTS=$(cscli alerts list -o raw)
-if [ "$CSCLI_ALERTS" = "id,scope,value,reason,country,as,decisions,created_at" ]; then
+if [ "$(echo "$CSCLI_ALERTS" | wc -l)" -le 1 ]; then
     CSCLI_ALERTS="<p>No alerts available.</p>"
 else
     CSCLI_ALERTS=$(echo "$CSCLI_ALERTS" | tail -n +2 | csvtool format '<tr><td><span style="pointer-events:none;">%1</span></td><td><span style="pointer-events:none;">%2</span></td><td><span style="pointer-events:none;">%3</span></td><td><span style="pointer-events:none;">%4</span></td><td><span style="pointer-events:none;">%5</span></td><td><span style="pointer-events:none;">%6</span></td><td><span style="pointer-events:none;">%7</span></td><td><span style="pointer-events:none;">%8</span></td></tr>\n' - | {
@@ -104,7 +104,7 @@ else
 fi
 
 CSCLI_DECISIONS=$(cscli decisions list -o raw)
-if [ "$CSCLI_DECISIONS" = "id,source,ip,reason,action,country,as,events_count,expiration,simulated,alert_id" ]; then
+if [ "$(echo "$CSCLI_DECISIONS" | wc -l)" -le 1 ]; then
     CSCLI_DECISIONS="<p>No decisions available.</p>"
 else
     CSCLI_DECISIONS=$(echo "$CSCLI_DECISIONS" | tail -n +2 | csvtool format '<tr><td><span style="pointer-events:none;">%1</span></td><td><span style="pointer-events:none;">%2</span></td><td><span style="pointer-events:none;">%3</span></td><td><span style="pointer-events:none;">%4</span></td><td><span style="pointer-events:none;">%5</span></td><td><span style="pointer-events:none;">%6</span></td><td><span style="pointer-events:none;">%7</span></td><td><span style="pointer-events:none;">%8</span></td><td><span style="pointer-events:none;">%9</span></td><td><span style="pointer-events:none;">%10</span></td><td><span style="pointer-events:none;">%11</span></td></tr>\n' - | {
