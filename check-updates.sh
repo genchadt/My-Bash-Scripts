@@ -1,10 +1,11 @@
 #!/bin/bash
 
+# Server details && time
 SERVER_HOSTNAME="Lightsail Web"
 SERVER_TIME=$(date)
 UPTIME_INFO=$(uptime -p)
 
-# Collect and format package and distribution updates
+# Package update details
 apt-get update -y
 UPGRADE_LIST=$(apt list --upgradable 2>/dev/null | grep -E 'upgradable from' | awk -F'[][]' '{print $1 " " $2}')
 
@@ -23,7 +24,7 @@ EOF
     FORMATTED_UPGRADE_LIST="${FORMATTED_UPGRADE_LIST}</table>"
 fi
 
-# Collect and format disk information
+# System details
 DISK_INFO=$(df -h | awk '
 BEGIN {
     OFS="</td><td>"
@@ -41,7 +42,6 @@ END {
 
 FORMATTED_DISK_INFO="<table border='1'>$DISK_INFO</table>"
 
-# Collect and format CPU load information
 CPU_LOAD=$(uptime | awk -F'load average:' '{ print $2 }' | xargs | sed 's/,//g')
 FORMATTED_CPU_LOAD_INFO=$(echo "$CPU_LOAD" | awk '
 BEGIN {
@@ -54,7 +54,6 @@ END {
     print "</table>"
 }')
 
-# Collect memory usage
 MEMORY_INFO=$(free -h | awk '
 BEGIN {
     OFS="</td><td>"
@@ -92,20 +91,20 @@ END {
     print "</table>"
 }')
 
-# Extract and format CrowdSec alerts
+# CrowdSec alerts && decisions
 CSCLI_ALERTS=$(cscli alerts list -o raw | tail -n +2 | csvtool format '<tr><td><span style="pointer-events:none;">%1</span></td><td><span style="pointer-events:none;">%2</span></td><td><span style="pointer-events:none;">%3</span></td><td><span style="pointer-events:none;">%4</span></td><td><span style="pointer-events:none;">%5</span></td><td><span style="pointer-events:none;">%6</span></td><td><span style="pointer-events:none;">%7</span></td><td><span style="pointer-events:none;">%8</span></td></tr>\n' - | {
     echo "<table border=\"1\"><tr><th>ID</th><th>Scope</th><th>Value</th><th>Reason</th><th>Country</th><th>AS</th><th>Decisions</th><th>Created At</th></tr>"
     cat
     echo "</table>"
 })
 
-# Extract and format CrowdSec decisions
 CSCLI_DECISIONS=$(cscli decisions list -o raw | tail -n +2 | csvtool format '<tr><td><span style="pointer-events:none;">%1</span></td><td><span style="pointer-events:none;">%2</span></td><td><span style="pointer-events:none;">%3</span></td><td><span style="pointer-events:none;">%4</span></td><td><span style="pointer-events:none;">%5</span></td><td><span style="pointer-events:none;">%6</span></td><td><span style="pointer-events:none;">%7</span></td><td><span style="pointer-events:none;">%8</span></td><td><span style="pointer-events:none;">%9</span></td><td><span style="pointer-events:none;">%10</span></td><td><span style="pointer-events:none;">%11</span></td></tr>\n' - | {
     echo "<table border=\"1\"><tr><th>ID</th><th>Source</th><th>IP</th><th>Reason</th><th>Action</th><th>Country</th><th>AS</th><th>Events Count</th><th>Expiration</th><th>Simulated</th><th>Alert ID</th></tr>"
     cat
     echo "</table>"
 })
 
+# E-mail body construction
 EMAIL_BODY=$(cat << EOF
 <html>
 <head>
