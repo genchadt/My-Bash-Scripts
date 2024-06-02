@@ -28,16 +28,34 @@ fi
 DISK_INFO=$(df -h | awk '
 BEGIN {
     OFS="</td><td>"
-    print "<table border=\"1\">"
+    print "
+<table border=\"1\">"
 }
 NR==1 {
-    print "<tr><th>" $1 "</th><th>" $2 "</th><th>" $3 "</th><th>" $4 "</th><th>" $5 "</th><th>Mounted on</th></tr>"
+    print "
+    <tr>
+        <th>" $1 "</th>
+        <th>" $2 "</th>
+        <th>" $3 "</th>
+        <th>" $4 "</th>
+        <th>" $5 "</th>
+        <th>Mounted on</th>
+    </tr>"
 }
 NR>1 {
-    print "<tr><td>" $1 "</td><td>" $2 "</td><td>" $3 "</td><td>" $4 "</td><td>" $5 "</td><td>" $6 "</td></tr>"
+    print "
+    <tr>
+        <td>" $1 "</td>
+        <td>" $2 "</td>
+        <td>" $3 "</td>
+        <td>" $4 "</td>
+        <td>" $5 "</td>
+        <td>" $6 "</td>
+    </tr>"
 }
 END {
-    print "</table>"
+    print "
+</table>"
 }')
 
 FORMATTED_DISK_INFO="<table border='1'>$DISK_INFO</table>"
@@ -45,39 +63,91 @@ FORMATTED_DISK_INFO="<table border='1'>$DISK_INFO</table>"
 CPU_LOAD=$(uptime | awk -F'load average:' '{ print $2 }' | xargs | sed 's/,//g')
 FORMATTED_CPU_LOAD_INFO=$(echo "$CPU_LOAD" | awk '
 BEGIN {
-    print "<table border=\"1\"><tr><th>1 Minute Load</th><th>5 Minute Load</th><th>15 Minute Load</th></tr>"
+    print "
+<table border=\"1\">
+    <tr>
+        <th>1 Minute Load</th>
+        <th>5 Minute Load</th><th>15 Minute Load</th></tr>"
 }
 {
-    print "<tr><td style=\"text-align:center\">" $1 " %</td><td style=\"text-align:center\">" $2 " %</td><td style=\"text-align:center\">" $3 " %</td></tr>"
+    print "
+    <tr>
+        <td style=\"text-align:center\">" $1 " %</td>
+        <td style=\"text-align:center\">" $2 " %</td>
+        <td style=\"text-align:center\">" $3 " %</td>
+    </tr>"
 }
 END {
-    print "</table>"
+    print "
+</table>"
 }')
 
 MEMORY_INFO=$(free -h | awk '
 BEGIN {
     OFS="</td><td>"
-    print "<table border=\"1\"><tr><th>Type</th><th>Total</th><th>Used</th><th>Free</th><th>Shared</th><th>Buff/Cache</th><th>Available</th></tr>"
+    print "
+<table border=\"1\">
+    <tr>
+        <th>Type</th>
+        <th>Total</th>
+        <th>Used</th>
+        <th>Free</th>
+        <th>Shared</th>
+        <th>Buff/Cache</th>
+        <th>Available</th>
+    </tr>"
 }
 NR==2 {
-    print "<tr><td>Memory</td><td>" $2 "</td><td>" $3 "</td><td>" $4 "</td><td>" $5 "</td><td>" $6 "</td><td>" $7 "</td></tr>"
+    print "
+    <tr>
+        <td>Memory</td>
+        <td>" $2 "</td>
+        <td>" $3 "</td>
+        <td>" $4 "</td>
+        <td>" $5 "</td>
+        <td>" $6 "</td>
+        <td>" $7 "</td>
+    </tr>"
 }
 NR==3 {
-    print "<tr><td>Swap</td><td>" $2 "</td><td>" $3 "</td><td>" $4 "</td><td>-</td><td>-</td><td>-</td></tr>"
+    print "
+    <tr>
+        <td>Swap</td>
+        <td>" $2 "</td>
+        <td>" $3 "</td>
+        <td>" $4 "</td>
+        <td>-</td>
+        <td>-</td>
+        <td>-</td>
+    </tr>"
 }
 END {
-    print "</table>"
+    print "
+</table>"
 }')
 
 ACTIVE_SSH_SESSIONS=$(who | awk '
 BEGIN {
-    print "<table border=\"1\"><tr><th>User</th><th>Terminal</th><th>Login Time</th><th>IP Address</th></tr>"
+    print "
+<table border=\"1\">
+    <tr><th>User</th>
+        <th>Terminal</th>
+        <th>Login Time</th>
+        <th>IP Address</th>
+    </tr>"
 }
 {
-        print "<tr><td>" $1 "</td><td>" $2 "</td><td>" $3 " " $4 "</td><td>" $5 "</td></tr>"
+        print "
+    <tr>
+        <td>" $1 "</td>
+        <td>" $2 "</td>
+        <td>" $3 " " $4 "</td>
+        <td>" $5 "</td>
+    </tr>"
 }
 END {
-    print "</table>"
+    print "
+</table>"
 }')
 
 NETWORK_INFO=$(ip -brief addr show | awk '
