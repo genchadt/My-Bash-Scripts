@@ -119,13 +119,21 @@ END {
 # </table>
 ACTIVE_SSH_SESSIONS=$(who | awk '
 BEGIN {
-    print "<table border=\"1\"><tr><th>User</th><th>Terminal</th><th>Login Time</th><th>IP Address</th></tr>"
+    session_count = 0
 }
 {
-        print "<tr><td>" $1 "</td><td>" $2 "</td><td>" $3 " " $4 "</td><td>" $5 "</td></tr>"
+    if (session_count == 0) {
+        print "<table border=\"1\"><tr><th>User</th><th>Terminal</th><th>Login Time</th><th>IP Address</th></tr>"
+    }
+    session_count++
+    print "<tr><td>" $1 "</td><td>" $2 "</td><td>" $3 " " $4 "</td><td>" $5 "</td></tr>"
 }
 END {
-    print "</table>"
+    if (session_count == 0) {
+        print "<p>No active SSH sessions found.</p>"
+    } else {
+        print "</table>"
+    }
 }')
 
 # Network details
