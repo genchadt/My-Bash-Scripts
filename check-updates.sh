@@ -13,7 +13,7 @@ SERVER_UPTIME=$(uptime -p)
 #         <th>New Version</th>
 #     </tr>
 # </table>apt-get update -y
-APT_UPGRADE_LIST=$(apt list --upgradable 2>/dev/null | grep -E 'upgradable from' | awk -F'[][]' '
+APT_UPGRADE_LIST=$(apt list --upgradable 2>/dev/null | grep -E 'upgradable from' | awk '
 BEGIN {
     list_count = 0
 }
@@ -23,10 +23,10 @@ BEGIN {
     }
     list_count++
     split($1, package, "/")
+    match($0, /upgradable from: ([^ ]+)/, current_version)
     split($2, versions, " ")
     new_version = versions[1]
-    current_version = versions[length(versions)]
-    print "<tr><td>" package[1] "</td><td>" current_version "</td><td>" new_version "</td></tr>"
+    print "<tr><td>" package[1] "</td><td>" current_version[1] "</td><td>" new_version "</td></tr>"
 }
 END {
     if (list_count == 0) {
