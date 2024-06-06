@@ -23,10 +23,10 @@ BEGIN {
     }
     list_count++
     split($1, package, "/")
-    match($0, /upgradable from: ([^ ]+)/, current_version)
-    split($2, versions, " ")
-    new_version = versions[1]
-    print "<tr><td>" package[1] "</td><td>" current_version[1] "</td><td>" new_version "</td></tr>"
+    new_version = $2
+    match($0, /upgradable from: ([^ ]+)/, arr)
+    current_version = arr[1]
+    print "<tr><td>" package[1] "</td><td>" current_version "</td><td>" new_version "</td></tr>"
 }
 END {
     if (list_count == 0) {
