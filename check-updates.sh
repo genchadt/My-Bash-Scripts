@@ -24,7 +24,9 @@ BEGIN {
     list_count++
     split($1, package, "/")
     split($2, versions, " ")
-    print "<tr><td>" package[1] "</td><td>" versions[3] "</td><td>" versions[1] "</td></tr>"
+    new_version = versions[1]
+    current_version = versions[length(versions)]
+    print "<tr><td>" package[1] "</td><td>" current_version "</td><td>" new_version "</td></tr>"
 }
 END {
     if (list_count == 0) {
