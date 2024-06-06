@@ -24,8 +24,8 @@ BEGIN {
     list_count++
     split($1, package, "/")
     new_version = $2
-    match($0, /upgradable from: ([^ ]+)/, arr)
-    current_version = arr[1]
+    current_version = $NF
+    gsub(/[\[\]]/, "", current_version)
     print "<tr><td>" package[1] "</td><td>" current_version "</td><td>" new_version "</td></tr>"
 }
 END {
