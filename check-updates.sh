@@ -174,7 +174,7 @@ CSCLI_ALERTS=$(cscli alerts list -o raw)
 if [ "$(echo "$CSCLI_ALERTS" | wc -l)" -le 1 ]; then # no alerts
     CSCLI_ALERTS="<p>No alerts available.</p>"
 else # alerts
-    CSCLI_ALERTS=$(echo "$CSCLI_ALERTS" | tail -n +2 | csvtool format '<tr><td><span style="pointer-events:none;">%1</span></td><td><span style="pointer-events:none;">%2</span></td><td><span style="pointer-events:none;">%3</span></td><td><span style="pointer-events:none;">%4</span></td><td><span style="pointer-events:none;">%5</span></td><td><span style="pointer-events:none;">%6</span></td><td><span style="pointer-events:none;">%7</span></td><td><span style="pointer-events:none;">%8</span></td></tr>\n' - | {
+    CSCLI_ALERTS=$(echo "$CSCLI_ALERTS" | tail -n +2 | csvtool format "<tr><td><span style='pointer-events:none;'>%1</span></td><td><span style='pointer-events:none;'>%2</span></td><td><span style='pointer-events:none;'>$(echo %3 | sed 's/\./-/g')</span></td><td><span style='pointer-events:none;'>%4</span></td><td><span style='pointer-events:none;'>%5</span></td><td><span style='pointer-events:none;'>%6</span></td><td><span style='pointer-events:none;'>%7</span></td><td><span style='pointer-events:none;'>%8</span></td></tr>\n" - | {
         echo "<table border=\"1\"><tr><th>ID</th><th>Scope</th><th>Value</th><th>Reason</th><th>Country</th><th>AS</th><th>Decisions</th><th>Created At</th></tr>"
         cat
         echo "</table>"
