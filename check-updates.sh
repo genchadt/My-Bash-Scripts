@@ -156,7 +156,20 @@ BEGIN {
 /^wtmp/ { next }
 /^reboot/ { next }
 {
-    print "<tr><td>" $1 "</td><td>" $2 "</td><td>" $3 "</td><td>" $4 " " $5 "</td><td>" $6 "</td></tr>"
+    duration = $6
+    if (duration > 1440) {
+        days = int(duration / 1440)
+        hours = int((duration % 1440) / 60)
+        minutes = duration % 60
+        duration_str = days "d " hours "h " minutes "m"
+    } else if (duration > 60) {
+        hours = int(duration / 60)
+        minutes = duration % 60
+        duration_str = hours "h " minutes "m"
+    } else {
+        duration_str = duration "m"
+    }
+    print "<tr><td>" $1 "</td><td>" $2 "</td><td>" $3 "</td><td>" $4 " " $5 "</td><td>" duration_str "</td></tr>"
     login_count++
 }
 END {
