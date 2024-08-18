@@ -147,15 +147,14 @@ END {
 #         <th>IP Address</th>
 #     </tr>
 # </table>
-PREVIOUS_SSH_SESSIONS=$(last -n 10 | awk '
+PREVIOUS_SSH_SESSIONS=$(last -n 10 | grep -v 'reboot' | awk '
 BEGIN {
     login_count = 0
-    print "<table border=\"1\"><tr><th>User</th><th>Terminal</th><th>Login Time</th><th>IP Address</th></tr>"
+    print "<table border=\"1\"><tr><th>User</th><th>Terminal</th><th>IP Address</th><th>Login Time</th><th>Duration</th></tr>"
 }
 {
     login_count++
-    split($1, user, "pts/")
-    print "<tr><td>" user[1] "</td><td>" $2 "</td><td>" $3 " " $4 "</td><td>" $5 "</td></tr>"
+    print "<tr><td>" $1 "</td><td>" $2 "</td><td>" $3 "</td><td>" $4 " " $5 "</td><td>" $6 "</td></tr>"
 }
 END {
     if (login_count == 0) {
