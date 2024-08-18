@@ -138,6 +138,33 @@ END {
     }
 }')
 
+# Previous SSH sessions
+# <table border="1">
+#     <tr>
+#         <th>User</th>
+#         <th>Terminal</th>
+#         <th>Login Time</th>
+#         <th>IP Address</th>
+#     </tr>
+# </table>
+PREVIOUS_SSH_SESSIONS=$(last -n 10 | awk '
+BEGIN {
+    login_count = 0
+    print "<table border=\"1\"><tr><th>User</th><th>Terminal</th><th>Login Time</th><th>IP Address</th></tr>"
+}
+{
+    login_count++
+    split($1, user, "pts/")
+    print "<tr><td>" user[1] "</td><td>" $2 "</td><td>" $3 " " $4 "</td><td>" $5 "</td></tr>"
+}
+END {
+    if (login_count == 0) {
+        print "<p>No recent SSH logins found.</p>"
+    } else {
+        print "</table>"
+    }
+}')
+
 # Network details
 # <table border="1">
 #     <tr>
@@ -268,6 +295,8 @@ EMAIL_BODY=$(cat << EOF
             <p>$CPU_LOAD_DETAILS</p>
         <h2>Active SSH Sessions:</h2>
             <p>$ACTIVE_SSH_SESSIONS</p>
+        <h2>Previous SSH Sessions:</h2>
+            <p>$PREVIOUS_SSH_SESSIONS</p>
         <h2>Network Information:</h2>
             <p>$NETWORK_DETAILS</p>
         <h2>CrowdSec Alerts:</h2>
