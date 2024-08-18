@@ -147,18 +147,24 @@ END {
 #         <th>IP Address</th>
 #     </tr>
 # </table>
-PREVIOUS_SSH_SESSIONS=$(last -n 10 | grep -v 'reboot' | awk '
+PREVIOUS_SSH_SESSIONS=$(last -n 10 | awk '
 BEGIN {
     login_count = 0
-    print "<table border=\"1\"><tr><th>User</th><th>Terminal</th><th>IP Address</th><th>Login Time</th><th>Duration</th></tr>"
+    print "<table border=\"1\"><tr><th>User</th><th>Type</th><th>Terminal</th><th>IP Address</th><th>Login Time</th><th>Duration</th></tr>"
 }
+/^$/ { next }  # Skip empty lines
+/^wtmp/ { next }  # Skip "wtmp begins" lines
 {
+    if ($1 == "reboot") {
+        print "<tr><td>" $1 "</td><td>" $2 "</td><td>" $3 "</td><td></td><td>" $4 "</td><td>" $5 "</td></tr>"
+    } else {
+        print "<tr><td>" $1 "</td><td>user</td><td>" $2 "</td><td>" $3 "</td><td>" $4 " " $5 "</td><td>" $6 "</td></tr>"
+    }
     login_count++
-    print "<tr><td>" $1 "</td><td>" $2 "</td><td>" $3 "</td><td>" $4 " " $5 "</td><td>" $6 "</td></tr>"
 }
 END {
     if (login_count == 0) {
-        print "<p>No recent SSH logins found.</p>"
+        print "<p>No recent SSH logins or reboots found.</p>"
     } else {
         print "</table>"
     }
