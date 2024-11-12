@@ -15,21 +15,19 @@ SERVER_UPTIME=$(uptime -p)
 # </table>apt-get update -y
 APT_UPGRADE_LIST=$(apt list --upgradable 2>/dev/null | awk '
 BEGIN {
-    list_count = 0
+    count = 0
     print "<table border=\"1\"><tr><th>Package</th><th>Current Version</th><th>New Version</th></tr>"
 }
 /\[upgradable from:/ {
-    list_count++
-    split($1, package, "/")
-    pkg_name = package[1]
-    new_ver = $2
-    current = $NF
+    count++
+    split($1, pkg, "/")
+    current=$NF
     gsub(/[\[\]]/, "", current)
     gsub(/from: /, "", current)
-    print "<tr><td>" pkg_name "</td><td>" current "</td><td>" new_ver "</td></tr>"
+    print "<tr><td>" pkg[1] "</td><td>" current "</td><td>" $2 "</td></tr>"
 }
 END {
-    if (list_count == 0) {
+    if (count == 0) {
         print "<p>All packages are up to date.</p>"
     } else {
         print "</table>"
