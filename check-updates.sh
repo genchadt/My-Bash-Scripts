@@ -16,24 +16,17 @@ SERVER_UPTIME=$(uptime -p)
 APT_UPGRADE_LIST=$(apt list --upgradable 2>/dev/null | awk '
 BEGIN {
     list_count = 0
+    print "<table border=\"1\"><tr><th>Package</th><th>Current Version</th><th>New Version</th></tr>"
 }
 /\[upgradable from:/ {
-    if (list_count == 0) {
-        print "<table border=\"1\"><tr><th>Package</th><th>Current Version</th><th>New Version</th></tr>"
-    }
     list_count++
-    
-    # Split the line into parts
     split($1, package, "/")
-    
-    # Extract new version (field after first slash)
-    new_version = $3
-    
-    # Extract current version (everything between "from:" and "]")
-    match($0, /from: (.+?)\]/, current)
-    current_version = current[1]
-    
-    print "<tr><td>" package[1] "</td><td>" current_version "</td><td>" new_version "</td></tr>"
+    pkg_name = package[1]
+    new_ver = $2
+    current = $NF
+    gsub(/[\[\]]/, "", current)
+    gsub(/from: /, "", current)
+    print "<tr><td>" pkg_name "</td><td>" current "</td><td>" new_ver "</td></tr>"
 }
 END {
     if (list_count == 0) {
