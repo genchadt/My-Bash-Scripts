@@ -221,10 +221,8 @@ else # Alerts exist
         print "<table border=\"1\"><tr><th>ID</th><th>Scope</th><th>Value</th><th>Reason</th><th>Country</th><th>AS</th><th>Decisions</th><th>Created At</th></tr>"
     }
     {
-        if ($3 ~ /^Ip:/) {
-            gsub(/^Ip:/, "", $3)  # Remove "Ip:" prefix from Value if present
-            gsub(/\./, "-", $3)   # Replace periods with hyphens in Value
-        }
+        gsub(/^Ip:/, "", $3)      # Remove "Ip:" prefix from Value if present
+        gsub(/\./, "-", $3)       # Replace periods with hyphens in Value
         print "<tr>"
         for (i = 1; i <= NF; i++) {
             print "<td><span style=\"pointer-events:none;\">" $i "</span></td>"
