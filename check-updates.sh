@@ -213,15 +213,29 @@ END {
 #     </tr>
 # </table>
 CSCLI_ALERTS=$(cscli alerts list -o raw)
-if [ "$(echo "$CSCLI_ALERTS" | wc -l)" -le 1 ]; then # no alerts
+if [ "$(echo "$CSCLI_ALERTS" | wc -l)" -le 1 ]; then # No alerts
     CSCLI_ALERTS="<p>No alerts available.</p>"
-else # alerts
-    CSCLI_ALERTS=$(echo "$CSCLI_ALERTS" | tail -n +2 | csvtool format "<tr><td><span style='pointer-events:none;'>%1</span></td><td><span style='pointer-events:none;'>%2</span></td><td><span style='pointer-events:none;'>$(echo %3 | sed 's/\./-/g')</span></td><td><span style='pointer-events:none;'>%4</span></td><td><span style='pointer-events:none;'>%5</span></td><td><span style='pointer-events:none;'>%6</span></td><td><span style='pointer-events:none;'>%7</span></td><td><span style='pointer-events:none;'>%8</span></td></tr>\n" - | {
-        echo "<table border=\"1\"><tr><th>ID</th><th>Scope</th><th>Value</th><th>Reason</th><th>Country</th><th>AS</th><th>Decisions</th><th>Created At</th></tr>"
-        cat
-        echo "</table>"
-    })
+else # Alerts exist
+    CSCLI_ALERTS=$(echo "$CSCLI_ALERTS" | tail -n +2 | awk -F',' '
+    BEGIN {
+        print "<table border=\"1\"><tr><th>ID</th><th>Scope</th><th>Value</th><th>Reason</th><th>Country</th><th>AS</th><th>Decisions</th><th>Created At</th></tr>"
+    }
+    {
+        if ($3 ~ /^Ip:/) {
+            gsub(/^Ip:/, "", $3)  # Remove "Ip:" prefix from Value if present
+            gsub(/\./, "-", $3)   # Replace periods with hyphens in Value
+        }
+        print "<tr>"
+        for (i = 1; i <= NF; i++) {
+            print "<td><span style=\"pointer-events:none;\">" $i "</span></td>"
+        }
+        print "</tr>"
+    }
+    END {
+        print "</table>"
+    }')
 fi
+
 
 # CrowdSec decisions
 # <table border="1">
@@ -240,14 +254,25 @@ fi
 #     </tr>
 # </table>
 CSCLI_DECISIONS=$(cscli decisions list -o raw)
-if [ "$(echo "$CSCLI_DECISIONS" | wc -l)" -le 1 ]; then # no decisions
+if [ "$(echo "$CSCLI_DECISIONS" | wc -l)" -le 1 ]; then # No decisions
     CSCLI_DECISIONS="<p>No decisions available.</p>"
-else # decisions
-    CSCLI_DECISIONS=$(echo "$CSCLI_DECISIONS" | tail -n +2 | csvtool format "<tr><td><span style='pointer-events:none;'>%1</span></td><td><span style='pointer-events:none;'>%2</span></td><td><span style='pointer-events:none;'>$(echo %3 | sed 's/\./-/g')</span></td><td><span style='pointer-events:none;'>%4</span></td><td><span style='pointer-events:none;'>%5</span></td><td><span style='pointer-events:none;'>%6</span></td><td><span style='pointer-events:none;'>%7</span></td><td><span style='pointer-events:none;'>%8</span></td><td><span style='pointer-events:none;'>%9</span></td><td><span style='pointer-events:none;'>%10</span></td><td><span style='pointer-events:none;'>%11</span></td></tr>\n" - | {
-        echo "<table border=\"1\"><tr><th>ID</th><th>Source</th><th>IP</th><th>Reason</th><th>Action</th><th>Country</th><th>AS</th><th>Events Count</th><th>Expiration</th><th>Simulated</th><th>Alert ID</th></tr>"
-        cat
-        echo "</table>"
-    })
+else # Decisions exist
+    CSCLI_DECISIONS=$(echo "$CSCLI_DECISIONS" | tail -n +2 | awk -F',' '
+    BEGIN {
+        print "<table border=\"1\"><tr><th>ID</th><th>Source</th><th>IP</th><th>Reason</th><th>Action</th><th>Country</th><th>AS</th><th>Events Count</th><th>Expiration</th><th>Simulated</th><th>Alert ID</th></tr>"
+    }
+    {
+        gsub(/^Ip:/, "", $3)      # Remove "Ip:" prefix from IP
+        gsub(/\./, "-", $3)       # Replace periods with hyphens in IP
+        print "<tr>"
+        for (i = 1; i <= NF; i++) {
+            print "<td><span style=\"pointer-events:none;\">" $i "</span></td>"
+        }
+        print "</tr>"
+    }
+    END {
+        print "</table>"
+    }')
 fi
 
 # E-mail body construction
