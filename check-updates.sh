@@ -193,6 +193,9 @@ BEGIN {
     print "<table border=\"1\"><tr><th>Interface</th><th>State</th><th>IP Address</th></tr>"
 }
 {
+    if ($1 == "lo") {
+        next
+    }
     print "<tr><td>" $1 "</td><td>" $2 "</td><td>" $3 "</td></tr>"
 }
 END {
