@@ -295,27 +295,27 @@ EMAIL_BODY=$(cat << EOF
     <body>
         <h1>Server Status Report: $SERVER_HOSTNAME</h1>
         <h2>Server Time:</h2>
-            <p>$SERVER_TIME</p>
+            $SERVER_TIME
         <h2>Uptime:</h2>
-            <p>$SERVER_UPTIME</p>
+            $SERVER_UPTIME
         <h2>Available Package Updates:</h2>
-            <p>$APT_UPGRADE_LIST</p>
+            $APT_UPGRADE_LIST
         <h2>Disk Information:</h2>
-            <p>$DISK_DETAILS</p>
+            $DISK_DETAILS
         <h2>Memory Usage:</h2>
-            <p>$MEMORY_DETAILS</p>
+            $MEMORY_DETAILS
         <h2>CPU Load:</h2>
-            <p>$CPU_LOAD_DETAILS</p>
+            $CPU_LOAD_DETAILS
         <h2>Active SSH Sessions:</h2>
-            <p>$ACTIVE_SSH_SESSIONS</p>
+            $ACTIVE_SSH_SESSIONS
         <h2>Previous SSH Sessions:</h2>
-            <p>$PREVIOUS_SSH_SESSIONS</p>
+            $PREVIOUS_SSH_SESSIONS
         <h2>Network Information:</h2>
-            <p>$NETWORK_DETAILS</p>
+            $NETWORK_DETAILS
         <h2>CrowdSec Alerts:</h2>
-            <p>$CSCLI_ALERTS</p>
+            $CSCLI_ALERTS
         <h2>CrowdSec Decisions:</h2>
-            <p>$CSCLI_DECISIONS</p>
+            $CSCLI_DECISIONS
     </body>
 </html>
 EOF
@@ -325,3 +325,4 @@ TODAYS_DATE=$(date +"%Y-%m-%d")
 
 # Send the email
 echo "$EMAIL_BODY" | mail -s "Daily System Report, $TODAYS_DATE" -a "From: Lightsail Web Updates <lightsail-updates@thecollectivegc.com>" -a "Content-Type: text/html" webmaster@timothywb.com
+
