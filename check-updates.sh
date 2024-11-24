@@ -16,9 +16,11 @@ SERVER_UPTIME=$(uptime -p)
 APT_UPGRADE_LIST=$(apt list --upgradable 2>/dev/null | awk '
 BEGIN {
     count = 0
-    print "<table border=\"1\"><tr><th>Package</th><th>Current Version</th><th>New Version</th></tr>"
 }
 /\[upgradable from:/ {
+    if (count == 0) {
+        print "<table border=\"1\"><tr><th>Package</th><th>Current Version</th><th>New Version</th></tr>"
+    }
     count++
     split($1, pkg, "/")
     current=$NF
