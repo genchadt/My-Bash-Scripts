@@ -138,14 +138,42 @@ source $ZSH/oh-my-zsh.sh
 #    fi
 #}
 
-# Check smtp2go connectivity
-function check_smtp2go() {
-    local HOST="mail.smtp2go.com"
+# Check outbound email connectivity to a given SMTP server
+#
+# Parameters:
+#   $1: The hostname of the SMTP server to test. If not provided, the user
+#          will be prompted to enter one.
+#
+# Notes:
+#   The function will test the following ports: 25, 587, 465, 2525
+#   The function will timeout after 3 seconds if a connection is not established.
+#   The function will output the results in a colored format for easy identification.
+#   If the connection is refused, the function will output a message indicating that the
+#     service is likely not listening or that a firewall is blocking the connection.
+#   If the connection times out, the function will output a message indicating that the
+#     firewall is likely dropping the connection packets.
+function checksmtp() {
+    local HOST_ARG="$1"
     local PORTS=(25 587 465 2525)
     local TIMEOUT=3
     local GREEN='\033[0;32m'
     local RED='\033[0;31m'
     local NC='\033[0m' # No Color
+
+    # Convert the host argument to lowercase to avoid case sensitivity before mapping
+    HOST_ARG=$(echo "$HOST_ARG" | tr '[:upper:]' '[:lower:]')    
+    case "$HOST_ARG" in
+        "smtp2go") HOST="smtp.smtp2go.com" ;;
+        "sendgrid") HOST="smtp.sendgrid.net" ;;
+        "mailgun") HOST="smtp.mailgun.org" ;;
+        "postmark") HOST="smtp.postmarkapp.com" ;;
+        "amazon" | "ses") HOST="email-smtp.us-east-1.amazonaws.com" ;;
+        "brevo" | "sendinblue") HOST="smtp-relay.sendinblue.com" ;;
+        "gmail") HOST="smtp.gmail.com" ;;
+        "office365" | "o365" | "outlook" | "microsoft") HOST="smtp.office365.com" ;;
+        *) HOST="$HOST_ARG"
+            ;;
+    esac
 
     echo "--- Testing Outbound Connectivity to $HOST ---"
 
@@ -220,11 +248,11 @@ function whatsmyip() {
 
 # Editor Configuration
 if command -v code-insiders &> /dev/null; then
-  export EDITOR='code --wait'
+    export EDITOR='code --wait'
 elif command -v nvim &> /dev/null; then
-  export EDITOR='nvim'
+    export EDITOR='nvim'
 else
-  export EDITOR='vi'
+    export EDITOR='vi'
 fi
 
 # Edit .zshrc
